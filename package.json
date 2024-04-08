@@ -1,0 +1,36 @@
+{
+  "name": "football-data-api",
+  "version": "1.0.0",
+  "description": "GraphQL API for import football leagues, teams, players, and coaches.",
+  "main": "server.ts",
+  "type": "module",
+  "scripts": {
+    "start": "npx ts-node server.ts",
+    "build": "tsc",
+    "dev": "npx ts-node-dev --respawn --transpileOnly server.ts",
+    "lint": "eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.5",
+    "apollo-server-express": "^3.4.0",
+    "axios": "^0.25.0",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-rate-limit": "^5.3.0",
+    "mongoose": "^6.2.0",
+    "typescript": "^5.4.4"
+  },
+  "devDependencies": {
+    "@types/express-rate-limit": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.5.0",
+    "@typescript-eslint/parser": "^7.5.0",
+    "eslint": "^8.57.0",
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.7.2"
+  }
+}
