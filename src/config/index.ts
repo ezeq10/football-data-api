@@ -5,5 +5,5 @@ export const {
   MONGODB_URI,
   API_URL,
   API_TOKEN,
-  ALLOWED_API_REQUESTS,
+  ALLOWED_API_REQUESTS_PER_DAY,
 } = process.env;

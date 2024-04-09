@@ -103,7 +103,8 @@ export const resolvers = {
               ? await importCoachData(existingTeam, teamData.coach)
               : await importPlayersData(existingTeam, teamData.players);
 
-            // Update competitions array (not requested, but probably useful)
+            // Update competitions array 
+            // (not required, but probably useful unless an override flag is used to perform the update)
             const competitionsToUpdate = existingTeam.competitions.concat(teamData.competitions);
             await TeamModel.findOneAndUpdate(
               { _id: existingTeam._id },
