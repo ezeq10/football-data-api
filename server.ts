@@ -3,19 +3,30 @@ import { ApolloServer } from 'apollo-server-express';
 import mongoose from 'mongoose';
 import typeDefs from './src/graphql/type.defs';
 import { resolvers } from './src/graphql/resolvers';
-import { MONGODB_URI } from './src/config';
+import { createToken } from './src/services/token';
+import { 
+  MONGODB_URI, 
+  API_TOKEN 
+} from './src/config';
 
 // Connect to MongoDB
 mongoose.set('strictQuery', false);
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');    
+    
     startServer();
+    
+    // Initialize token with zero requests, used to limit the frequency of the requests
+    createToken(API_TOKEN)
+      .catch((error) => {
+        console.error('Error initializing token:', error);
+      });
   })
   .catch((err) => console.error('Error connecting to MongoDB:', err));
 
 
-// Start Express server  
+// Start server  
 async function startServer() {
   const app = express();
 

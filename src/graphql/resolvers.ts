@@ -3,6 +3,7 @@ import CompetitionModel from '../models/competition';
 import TeamModel from '../models/team';
 import PlayerModel from '../models/player';
 import CoachModel from '../models/coach';
+import { validateRequest } from '../utils/requestValidator';
 
 
 // interface CompetitionsData {
@@ -53,7 +54,8 @@ export const resolvers = {
   Mutation: {
     importLeague: async (_: any, { leagueCode }:importLeagueArgs) => {
       try {
-        // check number of api requests here  
+        // Validate request limit before calling fetchData
+        await validateRequest();
 
         // Fetch league data from the external API
         const leagueData = await fetchLeagueData(leagueCode);
@@ -114,7 +116,7 @@ export const resolvers = {
         
       } catch (error) {
         console.error('Error importing league:', error);
-        throw new Error('Failed to import league. Please try again later.');
+        throw new Error(`Failed to import league. ${error}. Please try again later.`);
       }
     },
   },

@@ -1,12 +1,15 @@
 import axios from 'axios';
 import moment from 'moment';
-import { API_URL } from '../config';
+import { 
+  API_URL, 
+  API_TOKEN 
+} from '../config';
 
 export const fetchLeagueData = async (leagueCode: string): Promise<any> => {
   try {
     const response = await axios.get(`${API_URL}/competitions/${leagueCode}/teams`, {
       headers: {
-        "X-Auth-Token": "3afb0722b9d943beb51d9a334dcc59b2"
+        "X-Auth-Token": API_TOKEN
       }
     });
     const data = response.data;
