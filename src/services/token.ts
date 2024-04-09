@@ -29,14 +29,14 @@ export const updateRequestCount = async (token: string, count: number): Promise<
 
 export const getRequestCount = async (token: string): Promise<number> => {
   try {
-    const tokenEntry = await TokenModel.findOne({ token });
-    if (tokenEntry) {
-      console.log('Request count:', tokenEntry.requestCount);
-      return tokenEntry.requestCount;
-    } else {
-      console.log('Token not found');
-      return 0;
+    let tokenEntry = await TokenModel.findOne({ token });
+    if (!tokenEntry) {
+      await createToken(token);
+      // Fetch the token entry again after creating it
+      tokenEntry = await TokenModel.findOne({ token });
     }
+    console.log('Request count:', tokenEntry.requestCount);
+    return tokenEntry.requestCount;
   } catch (error) {
     console.error('Error getting request count:', error);
     throw error;

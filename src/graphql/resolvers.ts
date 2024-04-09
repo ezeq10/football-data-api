@@ -1,9 +1,11 @@
 import { fetchLeagueData } from '../api/fetchData';
+import { validateRequest } from '../utils/requestValidator';
 import CompetitionModel from '../models/competition';
 import TeamModel from '../models/team';
 import PlayerModel from '../models/player';
 import CoachModel from '../models/coach';
-import { validateRequest } from '../utils/requestValidator';
+import { importCoachData } from '../services/coach';
+import { importPlayersData } from '../services/player';
 
 
 // interface CompetitionsData {
@@ -187,32 +189,3 @@ export const resolvers = {
     }
   }  
 };
-
-async function importPlayersData(team: any, playersData: any[]) {
-  for (const playerData of playersData) {
-    const existingPlayer = await PlayerModel.findOne({ name: playerData.name });
-    if (!existingPlayer) {
-      // Player doesn't exist, import the player
-      await PlayerModel.create({
-        name: playerData.name,
-        position: playerData.position,
-        dateOfBirth: playerData.dateOfBirth,
-        nationality: playerData.nationality,
-        team: team._id,
-      });
-    }
-  }
-}
-
-async function importCoachData(team: any, coachData: any) {
-  const existingCoach = await CoachModel.findOne({ name: coachData.name });
-  if (!existingCoach) {
-    // Coach doesn't exist, import the coach
-    await CoachModel.create({
-      name: coachData.name,
-      dateOfBirth: coachData.dateOfBirth,
-      nationality: coachData.nationality,
-      team: team._id,
-    });
-  }
-}
