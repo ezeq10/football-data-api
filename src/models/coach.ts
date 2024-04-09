@@ -8,9 +8,9 @@ export interface CoachDocument extends Document {
 }
 
 const coachSchema: Schema = new Schema({
-  name: { type: String },
-  dateOfBirth: { type: Date },
-  nationality: { type: String },
+  name: { type: String, required: false },
+  dateOfBirth: { type: Date, required: false },
+  nationality: { type: String, required: false },
   team: { type: Schema.Types.ObjectId, ref: 'Team', required: true }
 });
 

@@ -110,13 +110,13 @@ export const resolvers = {
     players: async (_: any, { leagueCode, teamName }: PlayersArgs): Promise<any[]> => {
       try {
         // Find competition by leagueCode
-        const competition = await CompetitionModel.findOne({ leagueCode });
+        const competition = await CompetitionModel.findOne({ code: leagueCode });
         if (!competition) {
           throw new Error(`Competition with league code "${leagueCode}" not found.`);
         }
 
         // Construct query to find teams participating in the competition
-        const teamsQuery: any = { leagues: competition._id };
+        const teamsQuery: any = { competitions: competition._id };
 
         // If teamName is provided, add name filter to team query
         if (teamName) {
