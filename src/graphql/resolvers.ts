@@ -39,6 +39,15 @@ interface importLeagueArgs {
 interface PlayersArgs extends importLeagueArgs {
   teamName?: string;
 }
+interface TeamArgs {
+  name: string;
+  includePlayers: boolean;
+}
+
+// Define a type for the team document with players property
+type TeamWithPlayers = Document & {
+  players?: any[]; // Define the players property here, adjust the type as per your actual player schema
+};
 
 export const resolvers = {
   Mutation: {
@@ -143,11 +152,25 @@ export const resolvers = {
         throw error;
       }
     },
-    team: async (_: any, { name }:{ name: string }) => {
+    team: async (_: any, { name, includePlayers }: TeamArgs): Promise<any> => {
       try {
-        // Find players based on name
+        // Find team based on name
         const team = await TeamModel.findOne({ name });
+
+        if (!team) {
+          throw new Error('Team not found');
+        }
+
+        if (includePlayers) {
+          // If includePlayers is true, fetch players associated with the team
+          const players = await PlayerModel.find({ team: team._id });
+          // Merge players with team document
+          const teamWithPlayers: TeamWithPlayers = { ...team.toObject(), players };
+          return teamWithPlayers;
+        }
+
         return team;
+      
       } catch (error) {
         console.error('Error finding team:', error);
         throw new Error('Failed to retrieve team. Please try again later.');
@@ -166,7 +189,7 @@ async function importPlayersData(team: any, playersData: any[]) {
         position: playerData.position,
         dateOfBirth: playerData.dateOfBirth,
         nationality: playerData.nationality,
-        team: team._id, // Assign the player to the team
+        team: team._id,
       });
     }
   }
@@ -180,7 +203,7 @@ async function importCoachData(team: any, coachData: any) {
       name: coachData.name,
       dateOfBirth: coachData.dateOfBirth,
       nationality: coachData.nationality,
-      team: team._id, // Assign the coach to the team
+      team: team._id,
     });
   }
 }
