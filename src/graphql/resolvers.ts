@@ -39,7 +39,6 @@ export const resolvers = {
       try {
         // Fetch league data from the external API
         const leagueData = await fetchLeagueData(leagueCode);
-        console.log('leagueData',leagueData);
 
         // Import competition
         const existingCompetition = await CompetitionModel.findOne({ code: leagueData.competition.code });
@@ -85,7 +84,29 @@ export const resolvers = {
         throw new Error('Failed to import league. Please try again later.');
       }
     },
-  }
+  },
+  Query: {
+    players: async (_: any, { leagueCode }:{ leagueCode: string }) => {
+      try {
+        // Find players based on the league code
+        const players = await PlayerModel.find({ leagueCode });
+        return players;
+      } catch (error) {
+        console.error('Error finding players:', error);
+        throw new Error('Failed to retrieve players. Please try again later.');
+      }
+    },
+    team: async (_: any, { name }:{ name: string }) => {
+      try {
+        // Find players based on name
+        const team = await TeamModel.findOne({ name });
+        return team;
+      } catch (error) {
+        console.error('Error finding team:', error);
+        throw new Error('Failed to retrieve team. Please try again later.');
+      }
+    }
+  }  
 };
 
 async function importPlayersData(team: any, playersData: any[]) {
