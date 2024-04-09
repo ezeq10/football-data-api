@@ -33,22 +33,34 @@ import CoachModel from '../models/coach';
 //   position: string;
 // }
 
+interface importLeagueArgs {
+  leagueCode: string;
+}
+interface PlayersArgs extends importLeagueArgs {
+  teamName?: string;
+}
+
 export const resolvers = {
   Mutation: {
-    importLeague: async (_: any, { leagueCode }:{ leagueCode: string }) => {
+    importLeague: async (_: any, { leagueCode }:importLeagueArgs) => {
       try {
         // Fetch league data from the external API
         const leagueData = await fetchLeagueData(leagueCode);
 
         // Import competition
         const existingCompetition = await CompetitionModel.findOne({ code: leagueData.competition.code });
+        let competitionId;
+
         if (!existingCompetition) {
           // Competition doesn't exist, import the competition
-          await CompetitionModel.create({
+          const newCompetition = await CompetitionModel.create({
             name: leagueData.competition.name,
             code: leagueData.competition.code,
             areaName: leagueData.competition.areaName
           });
+          competitionId = newCompetition._id;
+        } else {
+          competitionId = existingCompetition._id;
         }
         
 
@@ -63,6 +75,7 @@ export const resolvers = {
               shortName: teamData.shortName,
               areaName: teamData.areaName,
               address: teamData.address,
+              competitions: [competitionId]
             });
 
             // Import coach/players data for the new team
@@ -75,10 +88,18 @@ export const resolvers = {
             (teamData.players.length === 0) 
               ? await importCoachData(existingTeam, teamData.coach)
               : await importPlayersData(existingTeam, teamData.players);
+
+            // Update competitions array
+            const competitionsToUpdate = existingTeam.competitions.concat(teamData.competitions);
+            await TeamModel.findOneAndUpdate(
+              { _id: existingTeam._id },
+              { $set: { competitions: competitionsToUpdate } }
+            );
           }
         }
 
         return true; // Indicate successful import
+        
       } catch (error) {
         console.error('Error importing league:', error);
         throw new Error('Failed to import league. Please try again later.');
@@ -86,14 +107,41 @@ export const resolvers = {
     },
   },
   Query: {
-    players: async (_: any, { leagueCode }:{ leagueCode: string }) => {
+    players: async (_: any, { leagueCode, teamName }: PlayersArgs): Promise<any[]> => {
       try {
-        // Find players based on the league code
-        const players = await PlayerModel.find({ leagueCode });
+        // Find competition by leagueCode
+        const competition = await CompetitionModel.findOne({ leagueCode });
+        if (!competition) {
+          throw new Error(`Competition with league code "${leagueCode}" not found.`);
+        }
+
+        // Construct query to find teams participating in the competition
+        const teamsQuery: any = { leagues: competition._id };
+
+        // If teamName is provided, add name filter to team query
+        if (teamName) {
+          teamsQuery.name = teamName;
+        }
+
+        // Find teams participating in the competition
+        const teams = await TeamModel.find(teamsQuery);
+
+        // If no teams found, return empty array
+        if (teams.length === 0) {
+          return [];
+        }
+
+        // Construct query to find players belonging to the teams participating in the competition
+        const playersQuery: any = { team: { $in: teams.map(team => team._id) } };
+
+        // Find players belonging to the teams participating in the competition
+        const players = await PlayerModel.find(playersQuery);
+
         return players;
+
       } catch (error) {
-        console.error('Error finding players:', error);
-        throw new Error('Failed to retrieve players. Please try again later.');
+        console.error('Error retrieving players:', error.message);
+        throw error;
       }
     },
     team: async (_: any, { name }:{ name: string }) => {

@@ -6,9 +6,7 @@ interface TeamDocument extends Document {
   shortName: string;
   areaName: string;
   address: string;
-  competitions: string[];
-  players: string[] | null;
-  coach: string | null;
+  competitions: mongoose.Types.ObjectId[];
 }
 
 const teamSchema: Schema = new Schema({
@@ -17,9 +15,7 @@ const teamSchema: Schema = new Schema({
   shortName: { type: String, required: true },
   areaName: { type: String, required: true },
   address: { type: String, required: true },
-  competitions: [{ type: Schema.Types.ObjectId, ref: 'Competition' }],
-  players: [{ type: Schema.Types.ObjectId, ref: 'Player' }],
-  coach: { type: Schema.Types.ObjectId, ref: 'Coach' },
+  competitions: [{ type: Schema.Types.ObjectId, ref: 'Competition' }]
 });
 
 export default mongoose.model<TeamDocument>('Team', teamSchema);
