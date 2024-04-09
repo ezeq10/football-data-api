@@ -1,4 +1,5 @@
 import axios from 'axios';
+import moment from 'moment';
 import { API_URL } from '../config';
 
 export const fetchLeagueData = async (leagueCode: string): Promise<any> => {
@@ -12,9 +13,11 @@ export const fetchLeagueData = async (leagueCode: string): Promise<any> => {
 
     // Transform the data as needed to match the LeagueData interface
     const transformedData: any = {
-      name: data.competition.name,
-      code: data.competition.code,
-      areaName: data.teams[0].area.code,
+      competition: {
+        name: data.competition.name,
+        code: data.competition.code,
+        areaName: data.teams[0].area.code,
+      },
       teams: data.teams.map((team: any) => ({
         name: team.name,
         tla: team.tla,
@@ -24,7 +27,7 @@ export const fetchLeagueData = async (leagueCode: string): Promise<any> => {
         players: team.squad?.map((player: any) => ({
           name: player.name,
           position: player.position,
-          dateOfBirth: player.dateOfBirth,
+          dateOfBirth: moment(player.dateOfBirth).isValid() ? player.dateOfBirth : null,
           nationality: player.nationality,
         })),
         coach: {

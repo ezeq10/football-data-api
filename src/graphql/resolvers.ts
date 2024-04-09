@@ -2,6 +2,7 @@ import { fetchLeagueData } from '../api/fetchData';
 import TeamModel from '../models/team';
 import PlayerModel from '../models/player';
 import CompetitionModel from '../models/competition';
+import { log } from 'console';
 
 // interface CompetitionsData {
 //   name: string;
@@ -38,26 +39,22 @@ export const resolvers = {
         // Fetch league data from the external API
         const leagueData = await fetchLeagueData(leagueCode);
         console.log('leagueData',leagueData);
-        
-        /*
-        // Import competitions teams
-        for (const competitionData of leagueData.competitions) {
-          const existingCompetition = await CompetitionModel.findOne({ code: competitionData.code });
 
-          if (!existingCompetition) {
-            // Competition doesn't exist, import the competition
-            await CompetitionModel.create({
-              name: competitionData.name,
-              code: competitionData.code,
-              areaName: competitionData.areaName,
-            });
-          }
+        // Import competition
+        const existingCompetition = await CompetitionModel.findOne({ code: leagueData.competition.code });
+        if (!existingCompetition) {
+          // Competition doesn't exist, import the competition
+          await CompetitionModel.create({
+            name: leagueData.competition.name,
+            code: leagueData.competition.code,
+            areaName: leagueData.competition.areaName
+          });
         }
+        
 
         // Import teams and players
         for (const teamData of leagueData.teams) {
           const existingTeam = await TeamModel.findOne({ tla: teamData.tla });
-
           if (!existingTeam) {
             // Team doesn't exist, import the team along with its players
             const newTeam = await TeamModel.create({
@@ -74,7 +71,7 @@ export const resolvers = {
             // Team exists, import new players if they don't already exist
             await importPlayersData(existingTeam, teamData.players);
           }
-        }*/
+        }
 
         return true; // Indicate successful import
       } catch (error) {
@@ -85,20 +82,20 @@ export const resolvers = {
   }
 };
 
-// async function importPlayersData(team: any, playersData: any[]) {
-//   for (const playerData of playersData) {
-//     // Check if player exists in MongoDB
-//     const existingPlayer = await PlayerModel.findOne({ name: playerData.name });
-
-//     if (!existingPlayer) {
-//       // Player doesn't exist, import the player
-//       await PlayerModel.create({
-//         name: playerData.name,
-//         position: playerData.position,
-//         dateOfBirth: playerData.dateOfBirth,
-//         nationality: playerData.nationality,
-//         team: team._id, // Assign the player to the team
-//       });
-//     }
-//   }
-// }
+async function importPlayersData(team: any, playersData: any[]) {
+  console.log('team',team, playersData);
+  
+  for (const playerData of playersData) {
+    const existingPlayer = await PlayerModel.findOne({ name: playerData.name });
+    if (!existingPlayer) {
+      // Player doesn't exist, import the player
+      await PlayerModel.create({
+        name: playerData.name,
+        position: playerData.position,
+        dateOfBirth: playerData.dateOfBirth,
+        nationality: playerData.nationality,
+        team: team._id, // Assign the player to the team
+      });
+    }
+  }
+}
