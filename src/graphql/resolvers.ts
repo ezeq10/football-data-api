@@ -1,8 +1,9 @@
 import { fetchLeagueData } from '../api/fetchData';
+import CompetitionModel from '../models/competition';
 import TeamModel from '../models/team';
 import PlayerModel from '../models/player';
-import CompetitionModel from '../models/competition';
-import { log } from 'console';
+import CoachModel from '../models/coach';
+
 
 // interface CompetitionsData {
 //   name: string;
@@ -65,11 +66,16 @@ export const resolvers = {
               address: teamData.address,
             });
 
-            // Import players data for the new team
-            await importPlayersData(newTeam, teamData.players);
+            // Import coach/players data for the new team
+            (teamData.players.length === 0) 
+              ? await importCoachData(newTeam, teamData.coach)
+              : await importPlayersData(newTeam, teamData.players);
+
           } else {
-            // Team exists, import new players if they don't already exist
-            await importPlayersData(existingTeam, teamData.players);
+            // Team exists, import new coach/players if they don't already exist
+            (teamData.players.length === 0) 
+              ? await importCoachData(existingTeam, teamData.coach)
+              : await importPlayersData(existingTeam, teamData.players);
           }
         }
 
@@ -83,8 +89,6 @@ export const resolvers = {
 };
 
 async function importPlayersData(team: any, playersData: any[]) {
-  console.log('team',team, playersData);
-  
   for (const playerData of playersData) {
     const existingPlayer = await PlayerModel.findOne({ name: playerData.name });
     if (!existingPlayer) {
@@ -97,5 +101,18 @@ async function importPlayersData(team: any, playersData: any[]) {
         team: team._id, // Assign the player to the team
       });
     }
+  }
+}
+
+async function importCoachData(team: any, coachData: any) {
+  const existingCoach = await CoachModel.findOne({ name: coachData.name });
+  if (!existingCoach) {
+    // Coach doesn't exist, import the coach
+    await PlayerModel.create({
+      name: coachData.name,
+      dateOfBirth: coachData.dateOfBirth,
+      nationality: coachData.nationality,
+      team: team._id, // Assign the coach to the team
+    });
   }
 }

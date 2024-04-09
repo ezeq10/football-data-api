@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface CoachDocument extends Document {
   name: string;
-  dateOfBirth: Date;
+  dateOfBirth: Date | null;
   nationality: string;
 }
 
