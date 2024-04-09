@@ -1,14 +1,9 @@
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import mongoose from 'mongoose';
-import rateLimit from 'express-rate-limit';
 import typeDefs from './src/graphql/type.defs';
 import { resolvers } from './src/graphql/resolvers';
-import { 
-  MONGODB_URI, 
-  RATE_LIMIT_WINDOW_MS, 
-  RATE_LIMIT_MAX_REQUESTS 
-} from './src/config';
+import { MONGODB_URI } from './src/config';
 
 // Connect to MongoDB
 mongoose.set('strictQuery', false);
@@ -23,14 +18,6 @@ mongoose.connect(MONGODB_URI)
 // Start Express server  
 async function startServer() {
   const app = express();
-
-  // Apply rate limiting middleware
-  const limiter = rateLimit({
-    windowMs: Number(RATE_LIMIT_WINDOW_MS),
-    max: Number(RATE_LIMIT_MAX_REQUESTS),
-    message: 'Too many requests from this IP, please try again later.',
-  });
-  app.use(limiter);
 
   // Create ApolloServer and apply middleware to Express app
   const server = new ApolloServer({

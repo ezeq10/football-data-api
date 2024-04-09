@@ -46,13 +46,15 @@ interface TeamArgs {
 
 // Define a type for the team document with players property
 type TeamWithPlayers = Document & {
-  players?: any[]; // Define the players property here, adjust the type as per your actual player schema
+  players?: any[];
 };
 
 export const resolvers = {
   Mutation: {
     importLeague: async (_: any, { leagueCode }:importLeagueArgs) => {
       try {
+        // check number of api requests here  
+
         // Fetch league data from the external API
         const leagueData = await fetchLeagueData(leagueCode);
 
@@ -77,6 +79,7 @@ export const resolvers = {
         for (const teamData of leagueData.teams) {
           const existingTeam = await TeamModel.findOne({ tla: teamData.tla });
           if (!existingTeam) {
+            
             // Team doesn't exist, import the team along with its players
             const newTeam = await TeamModel.create({
               name: teamData.name,
@@ -88,17 +91,17 @@ export const resolvers = {
             });
 
             // Import coach/players data for the new team
-            (teamData.players.length === 0) 
+            (teamData?.players?.length === 0) 
               ? await importCoachData(newTeam, teamData.coach)
               : await importPlayersData(newTeam, teamData.players);
 
           } else {
             // Team exists, import new coach/players if they don't already exist
-            (teamData.players.length === 0) 
+            (teamData?.players?.length === 0) 
               ? await importCoachData(existingTeam, teamData.coach)
               : await importPlayersData(existingTeam, teamData.players);
 
-            // Update competitions array
+            // Update competitions array (not requested, but probably useful)
             const competitionsToUpdate = existingTeam.competitions.concat(teamData.competitions);
             await TeamModel.findOneAndUpdate(
               { _id: existingTeam._id },
@@ -140,11 +143,14 @@ export const resolvers = {
         }
 
         // Construct query to find players belonging to the teams participating in the competition
-        const playersQuery: any = { team: { $in: teams.map(team => team._id) } };
+        const filterByTeamCondition: any = { team: { $in: teams.map(team => team._id) } };
 
         // Find players belonging to the teams participating in the competition
-        const players = await PlayerModel.find(playersQuery);
-
+        const players = await PlayerModel.find(filterByTeamCondition);
+        if (players.length === 0) {
+          return await CoachModel.find(filterByTeamCondition);
+        }
+        
         return players;
 
       } catch (error) {
@@ -199,7 +205,7 @@ async function importCoachData(team: any, coachData: any) {
   const existingCoach = await CoachModel.findOne({ name: coachData.name });
   if (!existingCoach) {
     // Coach doesn't exist, import the coach
-    await PlayerModel.create({
+    await CoachModel.create({
       name: coachData.name,
       dateOfBirth: coachData.dateOfBirth,
       nationality: coachData.nationality,
