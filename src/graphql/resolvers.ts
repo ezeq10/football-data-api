@@ -122,10 +122,9 @@ export const resolvers = {
         if (teamName) {
           teamsQuery.name = teamName;
         }
-
+        
         // Find teams participating in the competition
         const teams = await TeamModel.find(teamsQuery);
-
         // If no teams found, return empty array
         if (teams.length === 0) {
           return [];
