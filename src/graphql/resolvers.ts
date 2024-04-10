@@ -7,6 +7,7 @@ import CoachModel from '../models/coach';
 import { importCompetitionData } from '../services/competition';
 import { importPlayersData } from '../services/player';
 import { importCoachData } from '../services/coach';
+import { getTeam, importTeamData } from '../services/team';
 
 // interface CompetitionsData {
 //   name: string;
@@ -67,19 +68,10 @@ export const resolvers = {
         
         // Import teams and players
         for (const teamData of leagueData.teams) {
-          const existingTeam = await TeamModel.findOne({ tla: teamData.tla });
+          const existingTeam = await getTeam(teamData.tla);
           if (!existingTeam) {
-            
-            // Team doesn't exist, import the team along with its players
-            const newTeam = await TeamModel.create({
-              name: teamData.name,
-              tla: teamData.tla,
-              shortName: teamData.shortName,
-              areaName: teamData.areaName,
-              address: teamData.address,
-              competitions: [competitionId]
-            });
-
+            // import new team 
+            const newTeam = await importTeamData(teamData, competitionId);
             // Import coach/players data for the new team
             (teamData?.players?.length === 0) 
               ? await importCoachData(newTeam, teamData.coach)
