@@ -29,20 +29,17 @@ To get started with the project, follow these steps:
 
 1. Clone the repository:
 
-git clone https://github.com/ezeq10/football-data.git
-cd your-repo
+  git clone https://github.com/ezeq10/football-data.git
+  
+  cd your-repo
 
-2. Install dependencies:
+2. Obtain an API token from [football-data.org](https://www.football-data.org/) and create a `.env` file in the root directory of the project. You can use the env.sample file to do this. Add your API token to the `.env` file:
 
-npm install
+  API_TOKEN=your-api-token
 
-3. Obtain an API token from [football-data.org](https://www.football-data.org/) and create a `.env` file in the root directory of the project. Add your API token to the `.env` file:
+3. Start the project with Docker Compose:
 
-API_TOKEN=your-api-token
-
-4. Start the project with Docker Compose:
-
-docker-compose up
+  docker-compose up
 
 ## Notes
 
