@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-interface TeamDocument extends Document {
+export interface TeamDocument extends Document {
   name: string;
   tla: string;
   shortName: string;

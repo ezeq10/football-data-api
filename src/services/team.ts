@@ -1,7 +1,7 @@
-import TeamModel from '../models/team';
+import TeamModel, { TeamDocument } from '../models/team';
 import { TeamData } from '../types';
 
-export async function getTeam(tla: string): Promise<any>  {
+export async function getTeam(tla: string): Promise<TeamDocument | null>  {
   try {
     return await TeamModel.findOne({ tla: tla });
   } catch (error) {
@@ -10,7 +10,7 @@ export async function getTeam(tla: string): Promise<any>  {
   }
 }
 
-export async function importTeamData(teamData: TeamData, competitionId: string): Promise<any> {
+export async function importTeamData(teamData: TeamData, competitionId: string): Promise<TeamDocument> {
   try {
     const newTeam = await TeamModel.create({
       name: teamData.name,
