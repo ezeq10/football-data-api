@@ -1,5 +1,6 @@
 import { FilterQuery } from 'mongoose';
 import PlayerModel, { PlayerDocument } from '../models/player';
+import { TeamDocument } from '../models/team';
 
 export async function getPlayers(filterCondition: FilterQuery<PlayerDocument>): Promise<PlayerDocument[] | null> {
   try {
@@ -19,7 +20,7 @@ export async function getPlayersByTeam(teamId: string): Promise<PlayerDocument[]
   }
 }
 
-export async function importPlayersData(team: any, playersData: any[]): Promise<void> {
+export async function importPlayersData(team: TeamDocument, playersData: PlayerDocument[]): Promise<void> {
   try {
     for (const playerData of playersData) {
       const existingPlayer = await PlayerModel.findOne({ name: playerData.name });

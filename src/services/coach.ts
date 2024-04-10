@@ -1,5 +1,6 @@
 import { FilterQuery } from 'mongoose';
 import CoachModel, { CoachDocument } from '../models/coach';
+import { TeamDocument } from '../models/team';
 
 export async function getCoaches(filterCondition: FilterQuery<CoachDocument>): Promise<CoachDocument[] | null> {
   try {
@@ -10,7 +11,7 @@ export async function getCoaches(filterCondition: FilterQuery<CoachDocument>): P
   }
 }
 
-export async function importCoachData(team: any, coachData: any): Promise<void> {
+export async function importCoachData(team: TeamDocument, coachData: CoachDocument): Promise<void> {
   try {
     const existingCoach = await CoachModel.findOne({ name: coachData.name });
     if (!existingCoach) {

@@ -1,4 +1,3 @@
-import { ObjectId } from 'mongoose';
 import { fetchLeagueData } from '../api/fetchData';
 import { validateRequest } from '../utils/requestValidator';
 import { getCompetition, importCompetitionData } from '../services/competition';
@@ -7,6 +6,7 @@ import { getCoaches, importCoachData } from '../services/coach';
 import { getTeamByTla, getTeamByName, getTeams, importTeamData, updateCompetitions } from '../services/team';
 import { TeamDocument } from '../models/team';
 import { PlayerOrCoachArrayOrNull, TeamWithPlayers } from '../types';
+import { FilterByTeamCondition, PlayersArgs, TeamArgs, TeamsFilterQuery, importLeagueArgs } from '../interfaces';
 
 // interface CompetitionsData {
 //   name: string;
@@ -36,23 +36,7 @@ import { PlayerOrCoachArrayOrNull, TeamWithPlayers } from '../types';
 //   position: string;
 // }
 
-interface importLeagueArgs {
-  leagueCode: string;
-}
-interface PlayersArgs extends importLeagueArgs {
-  teamName?: string;
-}
-interface TeamArgs {
-  name: string;
-  includePlayers: boolean;
-}
-interface TeamsFilterQuery {
-  competitions: ObjectId;
-  name?: string;
-}
-interface FilterByTeamCondition {
-  team: { $in: ObjectId[] };
-}
+
 
 export const resolvers = {
   Mutation: {
