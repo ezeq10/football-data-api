@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongoose';
 import TeamModel, { TeamDocument } from '../models/team';
 import { TeamData } from '../types';
 
@@ -25,6 +26,18 @@ export async function importTeamData(teamData: TeamData, competitionId: string):
 
   } catch (error) {
     console.error('Error importing team data:', error);
+    throw error;
+  }
+}
+
+export async function updateCompetitions(teamId: ObjectId, competitionId: string): Promise<void>  {
+  try {
+    await TeamModel.findOneAndUpdate(
+      { _id: teamId },
+      { $addToSet: { competitions: competitionId } }
+    );
+  } catch (error) {
+    console.error('Error retrieving team:', error);
     throw error;
   }
 }

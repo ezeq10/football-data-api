@@ -7,7 +7,8 @@ import CoachModel from '../models/coach';
 import { importCompetitionData } from '../services/competition';
 import { importPlayersData } from '../services/player';
 import { importCoachData } from '../services/coach';
-import { getTeam, importTeamData } from '../services/team';
+import { getTeam, importTeamData, updateCompetitions } from '../services/team';
+import { ObjectId } from 'mongoose';
 
 // interface CompetitionsData {
 //   name: string;
@@ -55,7 +56,7 @@ type TeamWithPlayers = Document & {
 
 export const resolvers = {
   Mutation: {
-    importLeague: async (_: any, { leagueCode }:importLeagueArgs) => {
+    importLeague: async (_, { leagueCode }:importLeagueArgs) => {
       try {
         // Validate request limit before calling fetchData
         await validateRequest();
@@ -84,12 +85,8 @@ export const resolvers = {
               : await importPlayersData(existingTeam, teamData.players);
 
             // Update competitions array 
-            // (not required, but probably useful unless an override flag is used to perform the update)
-            const competitionsToUpdate = existingTeam.competitions.concat(teamData.competitions);
-            await TeamModel.findOneAndUpdate(
-              { _id: existingTeam._id },
-              { $set: { competitions: competitionsToUpdate } }
-            );
+            // (not required, but probably useful unless an override flag is used to perform a complete update)
+            await updateCompetitions(existingTeam._id, competitionId);
           }
         }
 
@@ -102,7 +99,7 @@ export const resolvers = {
     },
   },
   Query: {
-    players: async (_: any, { leagueCode, teamName }: PlayersArgs): Promise<any[]> => {
+    players: async (_, { leagueCode, teamName }: PlayersArgs): Promise<any[]> => {
       try {
         // Find competition by leagueCode
         const competition = await CompetitionModel.findOne({ code: leagueCode });
@@ -141,7 +138,7 @@ export const resolvers = {
         throw error;
       }
     },
-    team: async (_: any, { name, includePlayers }: TeamArgs): Promise<any> => {
+    team: async (_, { name, includePlayers }: TeamArgs): Promise<any> => {
       try {
         // Find team based on name
         const team = await TeamModel.findOne({ name });
