@@ -6,37 +6,14 @@ import { getCoaches, importCoachData } from '../services/coach';
 import { getTeamByTla, getTeamByName, getTeams, importTeamData, updateCompetitions } from '../services/team';
 import { TeamDocument } from '../models/team';
 import { PlayerOrCoachArrayOrNull, TeamWithPlayers } from '../types';
-import { FilterByTeamCondition, PlayersArgs, TeamArgs, TeamsFilterQuery, importLeagueArgs } from '../interfaces';
-
-// interface CompetitionsData {
-//   name: string;
-//   code: string;
-//   areaName: string;
-//   teams: TeamData[];
-// }
-
-// interface TeamData {
-//   name: string;
-//   tla: string;
-//   shortName: string;
-//   areaName: string;
-//   address: string;
-//   players: PlayerData[] | null;
-//   coach: CoachData
-//   runningCompetitions: [] | null;
-// }
-
-// interface CoachData {
-//   name: string;
-//   dateOfBirth: string;
-//   nationality: string;
-// }
-
-// interface PlayerData extends CoachData {
-//   position: string;
-// }
-
-
+import { 
+  TransformedLeagueData,
+  FilterByTeamCondition, 
+  PlayersArgs, 
+  TeamArgs, 
+  TeamsFilterQuery,
+  importLeagueArgs 
+} from '../interfaces';
 
 export const resolvers = {
   Mutation: {
@@ -46,7 +23,7 @@ export const resolvers = {
         await validateRequest();
 
         // Fetch league data from the external API
-        const leagueData = await fetchLeagueData(leagueCode);
+        const leagueData: TransformedLeagueData = await fetchLeagueData(leagueCode);
 
         // Import competition
         const competitionId = await importCompetitionData(leagueData);
@@ -58,13 +35,13 @@ export const resolvers = {
             // import new team 
             const newTeam = await importTeamData(teamData, competitionId);
             // Import coach/players data for the new team
-            (teamData?.players?.length === 0) 
+            (teamData.players.length === 0) 
               ? await importCoachData(newTeam, teamData.coach)
               : await importPlayersData(newTeam, teamData.players);
 
           } else {
             // Team exists, import new coach/players if they don't already exist
-            (teamData?.players?.length === 0) 
+            (teamData.players?.length === 0) 
               ? await importCoachData(existingTeam, teamData.coach)
               : await importPlayersData(existingTeam, teamData.players);
 
