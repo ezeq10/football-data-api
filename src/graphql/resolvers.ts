@@ -4,9 +4,9 @@ import CompetitionModel from '../models/competition';
 import TeamModel from '../models/team';
 import PlayerModel from '../models/player';
 import CoachModel from '../models/coach';
-import { importCoachData } from '../services/coach';
+import { importCompetitionData } from '../services/competition';
 import { importPlayersData } from '../services/player';
-
+import { importCoachData } from '../services/coach';
 
 // interface CompetitionsData {
 //   name: string;
@@ -63,22 +63,8 @@ export const resolvers = {
         const leagueData = await fetchLeagueData(leagueCode);
 
         // Import competition
-        const existingCompetition = await CompetitionModel.findOne({ code: leagueData.competition.code });
-        let competitionId;
-
-        if (!existingCompetition) {
-          // Competition doesn't exist, import the competition
-          const newCompetition = await CompetitionModel.create({
-            name: leagueData.competition.name,
-            code: leagueData.competition.code,
-            areaName: leagueData.competition.areaName
-          });
-          competitionId = newCompetition._id;
-        } else {
-          competitionId = existingCompetition._id;
-        }
+        const competitionId = await importCompetitionData(leagueData);
         
-
         // Import teams and players
         for (const teamData of leagueData.teams) {
           const existingTeam = await TeamModel.findOne({ tla: teamData.tla });
