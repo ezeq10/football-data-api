@@ -1,14 +1,13 @@
+import { ObjectId } from 'mongoose';
 import { fetchLeagueData } from '../api/fetchData';
 import { validateRequest } from '../utils/requestValidator';
-import CompetitionModel from '../models/competition';
 import TeamModel from '../models/team';
 import PlayerModel from '../models/player';
-import CoachModel from '../models/coach';
-import { importCompetitionData } from '../services/competition';
-import { importPlayersData } from '../services/player';
-import { importCoachData } from '../services/coach';
-import { getTeam, importTeamData, updateCompetitions } from '../services/team';
-import { ObjectId } from 'mongoose';
+import { getCompetition, importCompetitionData } from '../services/competition';
+import { getPlayers, importPlayersData } from '../services/player';
+import { getCoaches, importCoachData } from '../services/coach';
+import { getTeam, getTeams, importTeamData, updateCompetitions } from '../services/team';
+import { PlayerOrCoachArrayOrNull } from '../types';
 
 // interface CompetitionsData {
 //   name: string;
@@ -47,6 +46,13 @@ interface PlayersArgs extends importLeagueArgs {
 interface TeamArgs {
   name: string;
   includePlayers: boolean;
+}
+interface TeamsFilterQuery {
+  competitions: ObjectId;
+  name?: string;
+}
+interface FilterByTeamCondition {
+  team: { $in: ObjectId[] };
 }
 
 // Define a type for the team document with players property
@@ -99,16 +105,16 @@ export const resolvers = {
     },
   },
   Query: {
-    players: async (_, { leagueCode, teamName }: PlayersArgs): Promise<any[]> => {
+    players: async (_, { leagueCode, teamName }: PlayersArgs): Promise<PlayerOrCoachArrayOrNull> => {
       try {
         // Find competition by leagueCode
-        const competition = await CompetitionModel.findOne({ code: leagueCode });
+        const competition = await getCompetition(leagueCode);
         if (!competition) {
           throw new Error(`Competition with league code "${leagueCode}" not found.`);
         }
 
         // Construct query to find teams participating in the competition
-        const teamsQuery: any = { competitions: competition._id };
+        const teamsQuery: TeamsFilterQuery = { competitions: competition._id };
 
         // If teamName is provided, add name filter to team query
         if (teamName) {
@@ -116,19 +122,19 @@ export const resolvers = {
         }
         
         // Find teams participating in the competition
-        const teams = await TeamModel.find(teamsQuery);
+        const teams = await getTeams(teamsQuery)
         // If no teams found, return empty array
         if (teams.length === 0) {
           return [];
         }
 
         // Construct query to find players belonging to the teams participating in the competition
-        const filterByTeamCondition: any = { team: { $in: teams.map(team => team._id) } };
+        const filterByTeamCondition: FilterByTeamCondition = { team: { $in: teams.map(team => team._id) } };
 
         // Find players belonging to the teams participating in the competition
-        const players = await PlayerModel.find(filterByTeamCondition);
+        const players = await getPlayers(filterByTeamCondition);
         if (players.length === 0) {
-          return await CoachModel.find(filterByTeamCondition);
+          return await getCoaches(filterByTeamCondition);
         }
         
         return players;

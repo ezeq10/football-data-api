@@ -1,4 +1,6 @@
 import { ObjectId } from "mongoose";
+import { PlayerDocument } from "../models/player";
+import { CoachDocument } from "../models/coach";
 
 export type TeamData = {
   name: string;
@@ -8,3 +10,5 @@ export type TeamData = {
   address: string;
   competitions: ObjectId[];
 }
+
+export type PlayerOrCoachArrayOrNull = PlayerDocument[] | CoachDocument[] | null;

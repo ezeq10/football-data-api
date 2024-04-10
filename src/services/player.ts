@@ -1,4 +1,14 @@
-import PlayerModel from '../models/player';
+import { FilterQuery } from 'mongoose';
+import PlayerModel, { PlayerDocument } from '../models/player';
+
+export async function getPlayers(filterCondition: FilterQuery<PlayerDocument>): Promise<PlayerDocument[] | null> {
+  try {
+    return await PlayerModel.find(filterCondition);
+  } catch (error) {
+    console.error('Error retrieving players:', error);
+    throw error;
+  }
+}
 
 export async function importPlayersData(team: any, playersData: any[]): Promise<void> {
   try {

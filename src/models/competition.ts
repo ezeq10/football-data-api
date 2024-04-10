@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-interface CompetitionDocument extends Document {
+export interface CompetitionDocument extends Document {
   name: string;
   code: string;
   areaName: string;

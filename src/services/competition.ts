@@ -1,4 +1,13 @@
-import CompetitionModel from '../models/competition';
+import CompetitionModel, { CompetitionDocument } from '../models/competition';
+
+export async function getCompetition(leagueCode: string): Promise<CompetitionDocument | null>  {
+  try {
+    return await CompetitionModel.findOne({ code: leagueCode });
+  } catch (error) {
+    console.error('Error retrieving competition:', error);
+    throw error;
+  }
+}
 
 export async function importCompetitionData(leagueData: any): Promise<string> {
   try {

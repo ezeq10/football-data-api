@@ -1,4 +1,14 @@
-import CoachModel from '../models/coach';
+import { FilterQuery } from 'mongoose';
+import CoachModel, { CoachDocument } from '../models/coach';
+
+export async function getCoaches(filterCondition: FilterQuery<CoachDocument>): Promise<CoachDocument[] | null> {
+  try {
+    return await CoachModel.find(filterCondition);
+  } catch (error) {
+    console.error('Error retrieving players:', error);
+    throw error;
+  }
+}
 
 export async function importCoachData(team: any, coachData: any): Promise<void> {
   try {
