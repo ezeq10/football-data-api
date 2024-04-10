@@ -10,6 +10,15 @@ export async function getPlayers(filterCondition: FilterQuery<PlayerDocument>): 
   }
 }
 
+export async function getPlayersByTeam(teamId: string): Promise<PlayerDocument[] | null> {
+  try {
+    return await PlayerModel.find({ team: teamId });
+  } catch (error) {
+    console.error('Error retrieving players:', error);
+    throw error;
+  }
+}
+
 export async function importPlayersData(team: any, playersData: any[]): Promise<void> {
   try {
     for (const playerData of playersData) {

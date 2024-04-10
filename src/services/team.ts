@@ -2,9 +2,18 @@ import { FilterQuery, ObjectId } from 'mongoose';
 import TeamModel, { TeamDocument } from '../models/team';
 import { TeamData } from '../types';
 
-export async function getTeam(tla: string): Promise<TeamDocument | null>  {
+export async function getTeamByTla(tla: string): Promise<TeamDocument | null>  {
   try {
     return await TeamModel.findOne({ tla: tla });
+  } catch (error) {
+    console.error('Error retrieving team:', error);
+    throw error;
+  }
+}
+
+export async function getTeamByName(name: string): Promise<TeamDocument | null>  {
+  try {
+    return await TeamModel.findOne({ name: name });
   } catch (error) {
     console.error('Error retrieving team:', error);
     throw error;

@@ -1,13 +1,12 @@
 import { ObjectId } from 'mongoose';
 import { fetchLeagueData } from '../api/fetchData';
 import { validateRequest } from '../utils/requestValidator';
-import TeamModel from '../models/team';
-import PlayerModel from '../models/player';
 import { getCompetition, importCompetitionData } from '../services/competition';
-import { getPlayers, importPlayersData } from '../services/player';
+import { getPlayers, getPlayersByTeam, importPlayersData } from '../services/player';
 import { getCoaches, importCoachData } from '../services/coach';
-import { getTeam, getTeams, importTeamData, updateCompetitions } from '../services/team';
-import { PlayerOrCoachArrayOrNull } from '../types';
+import { getTeamByTla, getTeamByName, getTeams, importTeamData, updateCompetitions } from '../services/team';
+import { TeamDocument } from '../models/team';
+import { PlayerOrCoachArrayOrNull, TeamWithPlayers } from '../types';
 
 // interface CompetitionsData {
 //   name: string;
@@ -55,11 +54,6 @@ interface FilterByTeamCondition {
   team: { $in: ObjectId[] };
 }
 
-// Define a type for the team document with players property
-type TeamWithPlayers = Document & {
-  players?: any[];
-};
-
 export const resolvers = {
   Mutation: {
     importLeague: async (_, { leagueCode }:importLeagueArgs) => {
@@ -75,7 +69,7 @@ export const resolvers = {
         
         // Import teams and players
         for (const teamData of leagueData.teams) {
-          const existingTeam = await getTeam(teamData.tla);
+          const existingTeam = await getTeamByTla(teamData.tla);
           if (!existingTeam) {
             // import new team 
             const newTeam = await importTeamData(teamData, competitionId);
@@ -144,18 +138,17 @@ export const resolvers = {
         throw error;
       }
     },
-    team: async (_, { name, includePlayers }: TeamArgs): Promise<any> => {
+    team: async (_, { name, includePlayers }: TeamArgs): Promise<TeamDocument | TeamWithPlayers> => {
       try {
         // Find team based on name
-        const team = await TeamModel.findOne({ name });
-
+        const team = await getTeamByName(name);
         if (!team) {
           throw new Error('Team not found');
         }
 
         if (includePlayers) {
           // If includePlayers is true, fetch players associated with the team
-          const players = await PlayerModel.find({ team: team._id });
+          const players = await getPlayersByTeam(team._id);
           // Merge players with team document
           const teamWithPlayers: TeamWithPlayers = { ...team.toObject(), players };
           return teamWithPlayers;

@@ -12,3 +12,8 @@ export type TeamData = {
 }
 
 export type PlayerOrCoachArrayOrNull = PlayerDocument[] | CoachDocument[] | null;
+
+// Define a type for the team document with players property
+export type TeamWithPlayers = Document & {
+  players?: PlayerDocument[];
+};
